@@ -1,0 +1,16 @@
+[project]
+name = "product-analytics-sql-ab"
+version = "0.1.0"
+description = "SQL product analytics on Olist and an A/B test on Criteo Uplift v2.1"
+requires-python = ">=3.13"
+
+[tool.ruff]
+line-length = 88
+extend-exclude = [".venv", "data"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

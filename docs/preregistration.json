@@ -1,0 +1,11 @@
+{
+  "cuped_feature": "f0",
+  "segment_feature": "f0",
+  "alpha": 0.05,
+  "srm_alarm_p": 0.001,
+  "srm_stop_deviation": 0.01,
+  "n_boot": 2000,
+  "holm_family_size": 9,
+  "control_visit_rate": 0.03820095691954503,
+  "control_conversion_rate": 0.0019375880152813366
+}
