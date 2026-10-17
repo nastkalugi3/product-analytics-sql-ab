@@ -64,7 +64,7 @@ def test_make_cards_on_dense_june(dense_con):
     cards = {c.label: c for c in d.make_cards(blocks["kpi"], blocks["monthly"])}
     gmv = cards["GMV (items + freight)"]
     assert gmv.north_star
-    assert gmv.value == "BRL 3,300.00"
+    assert gmv.value == "BRL 3.3k"
     # June 3300 vs May 200 = +1550%; no June 2016 data -> n/a
     assert gmv.deltas[0].text == "▲ +1550.0% vs May 2017"
     assert gmv.deltas[1].text == "▬ n/a vs Jun 2016"
@@ -97,7 +97,7 @@ def test_build_html_contains_required_parts(dense_con):
     assert "2017-03-05 to 2017-07-01 (analysis window)" in page
     assert "Updated:</b> 2026-10-17" in page
     assert "simulated" in page
-    assert "BRL 3,300.00" in page
+    assert "BRL 3.3k" in page
     assert "Late %" in page and "cell-bad" in page
     assert "Health beauty" in page and "Rio de Janeiro (RJ)" in page
     blocks = d.load_blocks(dense_con)
@@ -140,7 +140,7 @@ def test_headlines_come_from_the_data(dense_con):
     # June 2017 on the dense fixture: GMV 3300, May GMV 200 (the reference,
     # because June 2016 has no data), late 1/30 vs 0 in May
     assert s["headline"] == (
-        "June 2017: GMV BRL 3,300.00, up 1550.0% on May 2017; "
+        "June 2017: GMV BRL 3.3k, up 1550.0% on May 2017; "
         "late deliveries rose to 3.3% from 0.0% in May 2017"
     )
     # pooled 12-month late share: 2 late of 35 delivered (Mar, Apr, May, Jun)
@@ -156,7 +156,7 @@ def test_headlines_come_from_the_data(dense_con):
     assert s["headline"] in page
     # change the data and the headline changes with it
     blocks["kpi"].loc[blocks["kpi"].period == "current", "gmv"] = 6600.0
-    assert "BRL 6,600.00" in d.story(blocks)["headline"]
+    assert "BRL 6.6k" in d.story(blocks)["headline"]
 
 
 def test_black_friday_date_and_peak_label():
@@ -202,3 +202,38 @@ def test_sparkline_aria_label_and_contrast():
 
     for colour in (d.WARM_TEXT, d.ACCENT, d.MUTED, d.TEXT):
         assert ratio(colour, d.PAGE_BG) >= 4.5
+
+
+def test_gmv_cells_use_compact_format():
+    import re
+
+    values = [1_432_213.38, 249_393.44, 999_600.0, 9_960.0, 9_743.72, 1_000.0, 999.5]
+    df = pd.DataFrame(
+        {
+            "rank": range(1, len(values) + 1),
+            "gmv": values,
+            "orders": 10,
+            "late_share": 0.05,
+            "avg_review": 4.0,
+            "benchmark_late_share": 0.05,
+            "benchmark_review": 4.0,
+        }
+    )
+    page = d._table_html(df, "Name", [f"row {i}" for i in range(len(values))])
+    cells = re.findall(r'class="num">([^<]+)<', page)
+    assert cells == [
+        "BRL 1.43M", "BRL 249k", "BRL 1.00M", "BRL 10k", "BRL 9.7k", "BRL 1.0k",
+        "BRL 999.50",
+    ]  # fmt: skip
+    for text, value in zip(cells, values, strict=True):
+        if value >= 1000:
+            assert re.fullmatch(r"BRL \d{1,3}(\.\d)?k|BRL \d\.\d\dM", text), text
+    assert 'class="track"' in page and "height" not in page.split("<table>")[1]
+
+
+def test_real_page_tables_have_no_raw_amounts(dense_con):
+    import re
+
+    page = d.build_html(d.load_blocks(dense_con), generated=date(2026, 10, 17))
+    for text in re.findall(r'class="num">([^<]+)<', page):
+        assert not re.search(r"\d,\d{3}", text), text

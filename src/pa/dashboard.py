@@ -124,10 +124,11 @@ td {{ text-align: right; padding: 4px 8px; height: 32px;
   border-bottom: 1px solid {GRID}; }}
 th:nth-child(2), td:nth-child(2) {{ text-align: left; }}
 td:first-child, th:first-child {{ color: {MUTED}; width: 24px; }}
-.gmv {{ position: relative; min-width: 120px; }}
-.gmv .bar {{ position: absolute; left: 0; top: 8px; bottom: 8px;
-  background: {BAR_LIGHT}; border-radius: 2px; }}
-.gmv .num {{ position: relative; }}
+.gmv {{ display: flex; align-items: center; gap: 12px; min-width: 150px; }}
+.gmv .track {{ flex: 1; min-width: 40px; }}
+.gmv .bar {{ height: 8px; background: #D3D8DE; border-radius: 4px; }}
+.gmv .num {{ min-width: 64px; text-align: right; }}
+.narrow {{ max-width: 900px; }}
 td.cell-good {{ background: {ACCENT_TINT}; }}
 td.cell-bad {{ background: {WARM_TINT}; }}
 .tbl-title {{ font-size: 13px; font-weight: 600; margin: 24px 0 0; }}
@@ -170,11 +171,16 @@ def fmt_int(x) -> str:
 
 
 def fmt_brl(x: float) -> str:
-    """Money with a readable scale: BRL 1.04M, BRL 249k, BRL 166.82."""
-    if x >= 1e6:
+    """Money with a compact scale: BRL 1.04M, BRL 249k, BRL 9.7k, BRL 166.82.
+
+    From 1,000 up the value always has a k or M suffix; below 1,000 it is shown
+    with cents (used for the average order value).
+    """
+    if x >= 999_500:
         return f"BRL {x / 1e6:.2f}M"
-    if x >= 1e4:
-        return f"BRL {x / 1e3:.0f}k"
+    if x >= 1e3:
+        k = x / 1e3
+        return f"BRL {k:.0f}k" if round(k, 1) >= 10 else f"BRL {k:.1f}k"
     return f"BRL {x:,.2f}"
 
 
@@ -544,8 +550,8 @@ def _table_html(df: pd.DataFrame, first_col: str, labels: list[str]) -> str:
         rows.append(
             "<tr>"
             f"<td>{r.rank}</td><td>{html.escape(label)}</td>"
-            f'<td><div class="gmv"><div class="bar" '
-            f'style="width:{100 * r.gmv / top:.1f}%"></div>'
+            f'<td><div class="gmv"><div class="track"><div class="bar" '
+            f'style="width:{100 * r.gmv / top:.1f}%"></div></div>'
             f'<span class="num">{fmt_brl(r.gmv)}</span></div></td>'
             f"<td>{fmt_int(r.orders)}</td>"
             f'<td class="cell-{late}">{fmt_pct(r.late_share)}</td>'
@@ -745,15 +751,16 @@ def trend_figure(trend: pd.DataFrame, last_order_day=None):
                 col=1,
             )
         fig.add_annotation(
-            x=tail_start + (end_day - tail_start) / 2,
-            y=1.0,
             yref="y domain",
-            text=f"Not shown: orders thin out<br>in {last_day:%b %Y}",
+            y=1.0,
+            text=f"Shaded: not drawn, orders thin out in {last_day:%b %Y}",
             showarrow=False,
-            yanchor="top",
+            xref="x domain",
+            x=1,
+            xanchor="right",
+            yanchor="bottom",
+            yshift=6,
             font={"size": 11, "color": MUTED},
-            row=1,
-            col=1,
         )
         fig.update_xaxes(range=[t.week_start.min(), end_day])
     fig.update_yaxes(rangemode="tozero", tickformat=",")
@@ -845,7 +852,7 @@ volume thins out at the very end of the data.</p>
 
 <section>
 <h2>{e(s["seller_title"])}</h2>
-{seller_tbl}
+<div class="narrow">{seller_tbl}</div>
 </section>
 
 <div class="footer">
@@ -1076,7 +1083,7 @@ def build_png(blocks: dict[str, pd.DataFrame], path: Path) -> None:
             ax.text(
                 tail0 + (tail1 - tail0) / 2,
                 ax.get_ylim()[1] * 0.97,
-                "Not shown:\norders thin\nout in Aug 2018",
+                f"Not shown:\norders thin\nout in {tail1 - pd.Timedelta(days=1):%b %Y}",
                 ha="center",
                 va="top",
                 fontsize=7.5,
