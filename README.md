@@ -28,7 +28,7 @@ No machine learning here on purpose: the point is queries and experiment statist
 | Olist SQL (11 queries), notebook 01 | done, executed, outputs saved |
 | Criteo A/B (v2.1, 13,979,592 users), notebooks 02 and 03 | done, executed on the full data, outputs saved |
 | Olist dashboard (spec, 6 SQL blocks, HTML + PNG) | done: `python -m pa.dashboard` rebuilds it from the local database; requirements are simulated |
-| Unit tests for stats, SQL and the dashboard, CI | done: 131 tests pass, `ruff check .` clean |
+| Unit tests for stats, SQL and the dashboard, CI | done: 134 tests pass, `ruff check .` clean |
 
 Notebook 02 (design) was written before the outcomes were read; its choices are in
 `docs/preregistration.json` and were not changed afterwards. Notebook 03 adds a
