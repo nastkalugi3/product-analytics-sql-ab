@@ -23,8 +23,8 @@ from pa import config
 from pa.db import connect, run_sql
 
 # One accent for what matters, greys for context, one warm colour for "bad".
-# Accent (deep teal) and vermillion differ in hue and lightness, so they stay
-# apart for the common kinds of colour blindness; arrows and signs repeat the meaning.
+# Accent (deep teal) and vermillion differ in hue (their text lightness is nearly
+# equal), so arrows and signs repeat the meaning for colour-blind readers.
 ACCENT = "#0F766E"
 WARM = "#D55E00"  # fills and bars
 WARM_TEXT = "#B34700"  # text on the light page: contrast 5.3:1 (WARM is 3.7:1)

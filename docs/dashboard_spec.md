@@ -78,7 +78,7 @@ Rules that matter:
   (2017-11 and 2018-03 are far above the rest) pull the pooled share up.
 - **Trend headline:** compares the last 4 complete weeks with the same 4 weeks a year
   earlier (364 days back). The first weeks of 2017 are not used as a baseline: that
-  is the ramp-up of the data (about 270 orders a week against about 900 a year later).
+  is the ramp-up of the data (about 270 orders a week against about 900 by July 2017).
 - **Highlighting:** a table cell is tinted teal (better) or orange (worse) when it
   is better or worse than the all-orders average (late 6.79%, review 4.12 in the window) by more than 1
   percentage point (late) or 0.1 score points (review). These margins are my
