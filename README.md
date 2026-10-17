@@ -108,13 +108,13 @@ this, with sources: [docs/dashboard_design.md](docs/dashboard_design.md) (also i
 
 ![Dashboard preview: headline and so-what line, five KPI cards with sparklines, a funnel with the biggest drop in teal, a weekly trend with the Black Friday week marked, and tables of categories and sellers with tinted late and review cells](reports/figures/olist_dashboard_preview.png)
 
-*Preview drawn with matplotlib. The real page is interactive: [open
-`reports/dashboard/olist_dashboard.html`](reports/dashboard/olist_dashboard.html)
-(download it and open it in a browser; Plotly is loaded from a CDN, so without
-internet the cards and tables render but the funnel and trend charts do not).
-GitHub shows HTML files as source code, so viewing it online needs a
-static host such as GitHub Pages; I do not claim Pages is enabled for this
-repository. Figures: computed from Olist data, CC BY-NC-SA 4.0, credit: Olist.*
+**[Open the interactive dashboard](https://nastkalugi3.github.io/product-analytics-sql-ab/reports/dashboard/olist_dashboard.html)** (GitHub Pages).
+
+*Preview drawn with matplotlib. The source file is
+[`reports/dashboard/olist_dashboard.html`](reports/dashboard/olist_dashboard.html);
+Plotly is loaded from a CDN, so without internet the cards and tables render but
+the funnel and trend charts do not. Figures: computed from Olist data,
+CC BY-NC-SA 4.0, credit: Olist.*
 
 Numbers on the page (July 2018, the last complete month, from the generated output):
 
