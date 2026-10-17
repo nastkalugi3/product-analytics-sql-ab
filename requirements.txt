@@ -9,3 +9,4 @@ jupyter==1.1.1
 nbconvert==7.17.2
 nbformat==5.11.1
 ipykernel==7.4.0
+plotly==7.1.0

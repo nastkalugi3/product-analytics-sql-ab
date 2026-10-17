@@ -12,7 +12,7 @@ FORBIDDEN = ["QUALIFY", "GROUP BY ALL", "ORDER BY ALL", "LIST_", "UNNEST", "::"]
 
 
 def test_files_found():
-    assert len(FILES) >= 17  # 1 schema + 11 olist + 5 ab
+    assert len(FILES) >= 25  # 1 schema + 11 olist + 5 ab + 8 dashboard
 
 
 @pytest.mark.parametrize("path", FILES, ids=lambda p: str(p.relative_to(SQL_DIR)))

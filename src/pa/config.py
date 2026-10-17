@@ -15,6 +15,7 @@ CRITEO_PARQUET = Path(
 )
 SQL_DIR = ROOT / "sql"
 FIGURES_DIR = Path(os.environ.get("PA_FIGURES_DIR", ROOT / "reports" / "figures"))
+DASHBOARD_DIR = Path(os.environ.get("PA_DASHBOARD_DIR", ROOT / "reports" / "dashboard"))
 # Pre-registered choices (tracked): written by notebook 02, read by notebook 03.
 DESIGN_FILE = Path(
     os.environ.get("PA_DESIGN_FILE", ROOT / "docs" / "preregistration.json")

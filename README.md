@@ -4,7 +4,7 @@
 
 Author: Anastasia Kalugina
 
-Two parts, one repository:
+Three parts, one repository:
 
 1. **SQL analytics** of a Brazilian online marketplace (Olist, about 100k orders):
    11 business questions, each answered by one SQL file (DuckDB, written in a
@@ -15,6 +15,10 @@ Two parts, one repository:
    sensitivity analysis and limitations. The data was distorted by its owner on
    purpose, so this part is about method and pitfalls, not about ad effectiveness.
 
+3. **A sales/operations dashboard** for a simulated "Head of Sales & Operations" of
+   the same marketplace, built by the "requirements first" method: a requirements
+   document, one SQL query per dashboard block, one interactive HTML file.
+
 No machine learning here on purpose: the point is queries and experiment statistics.
 
 ## Status
@@ -23,7 +27,8 @@ No machine learning here on purpose: the point is queries and experiment statist
 |---|---|
 | Olist SQL (11 queries), notebook 01 | done, executed, outputs saved |
 | Criteo A/B (v2.1, 13,979,592 users), notebooks 02 and 03 | done, executed on the full data, outputs saved |
-| Unit tests for stats and SQL, CI | done: 90 tests pass, `ruff check .` clean |
+| Olist dashboard (spec, 6 SQL blocks, HTML + PNG) | done: `python -m pa.dashboard` rebuilds it from the local database; requirements are simulated |
+| Unit tests for stats, SQL and the dashboard, CI | done: 131 tests pass, `ruff check .` clean |
 
 Notebook 02 (design) was written before the outcomes were read; its choices are in
 `docs/preregistration.json` and were not changed afterwards. Notebook 03 adds a
@@ -78,6 +83,70 @@ Figures (computed from Criteo data, CC BY-NC-SA 4.0, credit: Criteo AI Lab):
 ![Covariate balance](reports/figures/criteo_covariate_balance.png)
 ![Sensitivity of the visit difference](reports/figures/criteo_sensitivity.png)
 
+## Part 3: dashboard (Olist sales and operations)
+
+**What and why.** A one-page dashboard for a *simulated* "Head of Sales & Operations".
+I followed the order a BI analyst works in: first the decisions the page must support
+and one agreed definition per metric
+([docs/dashboard_spec.md](docs/dashboard_spec.md), also in
+[Russian](docs/dashboard_spec.ru.md)), then the SQL for each block
+(`sql/dashboard/`), only then the picture. The client, the interview and the
+requirements are invented and marked as such; the data and every number are real
+Olist figures. The spec also lists the data-quality problems I checked before
+drawing anything (for example 99,092 `customer_id`s but only 95,774 real customers in
+the window, and a data tail that thins out in the last days of August 2018).
+
+The page opens with a one-sentence headline and a "so what" line (both written from
+the query results at build time), then follows a fixed order: KPI cards with a
+12-month sparkline and arrows, funnel, weekly trend with the Black Friday week and the
+thin data tail annotated, tables with inline bars and two tinted cells per row
+(categories, states, sellers: the analogue of a "per-manager" table), and a footer
+with source, licence and window dates. Greys for context, one teal accent, orange only
+for bad, an arrow and a sign next to every delta, no pie charts. Why it looks like
+this, with sources: [docs/dashboard_design.md](docs/dashboard_design.md) (also in
+[Russian](docs/dashboard_design.ru.md)).
+
+![Dashboard preview: headline and so-what line, five KPI cards with sparklines, a funnel with the biggest drop in teal, a weekly trend with the Black Friday week marked, and tables of categories and sellers with tinted late and review cells](reports/figures/olist_dashboard_preview.png)
+
+*Preview drawn with matplotlib. The real page is interactive: [open
+`reports/dashboard/olist_dashboard.html`](reports/dashboard/olist_dashboard.html)
+(download it and open it in a browser; Plotly is loaded from a CDN, so without
+internet the cards and tables render but the funnel and trend charts do not).
+GitHub shows HTML files as source code, so viewing it online needs a
+static host such as GitHub Pages; I do not claim Pages is enabled for this
+repository. Figures: computed from Olist data, CC BY-NC-SA 4.0, credit: Olist.*
+
+Numbers on the page (July 2018, the last complete month, from the generated output):
+
+| Card | July 2018 | vs June 2018 | vs July 2017 |
+|---|---|---|---|
+| GMV (North Star) | BRL 1.04M | +1.9% | +79.7% |
+| Orders | 6,233 | +1.4% | +58.0% |
+| Average order value | BRL 166.82 | +0.5% | +13.7% |
+| Late deliveries | 3.4% of delivered | +2.2 pp | +0.6 pp |
+| Average review score | 4.29 | 0.00 | +0.06 |
+
+June 2018 was unusually quiet for late deliveries (1.2% of delivered orders, the lowest
+month in the window), so July's +2.2 pp looks orange; July itself (3.4%) is below the
+12-month average of 7.6% (purchases from August 2017 to July 2018).
+
+Other numbers: the purchase funnel over the whole window goes 99,092 purchased, 98,957
+approved (99.9%), 97,376 handed to the carrier (98.4% of approved), 96,204 delivered
+(98.8% of handed over); 580 orders were canceled and 602 were unavailable. The peak
+week is the one starting 2017-11-20 with 2,972 orders. Late share by state ranges
+from 2.8% (Amazonas) to 21.5% (Alagoas); the average of all orders is 6.79%.
+
+**Why July and not August 2018.** August 2018 is a full month on the calendar, but
+daily orders fall from 256 on 2018-08-20 to 1 on 2018-08-31, so the cards use the last
+month that passes a completeness rule (see spec, section 4 and 8).
+
+**Open or rebuild.** `PYTHONPATH=src python -m pa.dashboard` (needs
+`data/olist.duckdb` from `python -m pa.data build`) writes
+`reports/dashboard/olist_dashboard.html` and the preview PNG (paths can be changed with
+`PA_DASHBOARD_DIR` and `PA_FIGURES_DIR`). The generated files are
+aggregates and are committed; the data is not. Not built: filters (period, department)
+and alerts; they are described in the spec as what a BI tool would add.
+
 ## Data and licences
 
 - **Olist Brazilian E-Commerce**, 9 tables, 2016-2018:
@@ -98,12 +167,12 @@ required citation are in [DATA_LICENSE.md](DATA_LICENSE.md).
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
 pytest -q && ruff check .            # tests use tiny fixtures, no downloads
-./run_all.sh                         # download, build, execute all notebooks
+./run_all.sh                         # download, build, execute notebooks, build dashboard
 ```
 
 Step by step: `PYTHONPATH=src python -m pa.data download` then
 `python -m pa.data build` (add `--criteo-sample-frac 0.1` for a 10% sample of
-Criteo while experimenting).
+Criteo while experimenting). Then `PYTHONPATH=src python -m pa.dashboard` builds the dashboard.
 
 If Kaggle asks for credentials, download the Olist archive by hand and unzip the
 CSV files into `data/raw/olist/` (or put your own `kaggle.json` in
@@ -118,9 +187,13 @@ download data or run notebooks.
 sql/schema/olist_views.sql   helper views and the analysis window
 sql/olist/01..11_*.sql       one business question per file
 sql/ab/01..05_*.sql          A/B queries on the Criteo parquet file
-src/pa/                      config, data download/build, DB helpers, statistics
+sql/dashboard/00..06_*.sql   one query per dashboard block
+src/pa/                      config, data download/build, DB helpers, statistics,
+                             dashboard builder (pa.dashboard)
 notebooks/                   01 Olist SQL, 02 A/B design, 03 A/B analysis
-tests/                       stats, SQL on hand-made fixtures, dialect check
+docs/dashboard_spec.md       simulated requirements for the dashboard (also in Russian)
+reports/dashboard/           generated interactive dashboard (HTML)
+tests/                       stats, SQL on hand-made fixtures, dialect check, dashboard
 ```
 
 ## SQL skills: which construct where

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Download data (skipped if present), build the database and parquet file,
-# execute the notebooks. Run from anywhere: ./run_all.sh
+# execute the notebooks, build the dashboard. Run from anywhere: ./run_all.sh
 set -euo pipefail
 cd "$(dirname "$0")"
 if [ -x .venv/bin/python ]; then
@@ -18,4 +18,5 @@ for nb in notebooks/01_olist_sql_analytics.ipynb \
           notebooks/03_ab_analysis.ipynb; do
     jupyter nbconvert --to notebook --execute --inplace "$nb"
 done
-echo "done: notebooks executed, figures in reports/figures/"
+python -m pa.dashboard       # reports/dashboard/olist_dashboard.html + preview PNG
+echo "done: notebooks executed, figures in reports/figures/, dashboard in reports/dashboard/"
